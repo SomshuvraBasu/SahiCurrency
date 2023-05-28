@@ -1,18 +1,15 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:tflite/tflite.dart';
-
 class Home extends StatefulWidget {
   @override
   _HomeState createState() => _HomeState();
 }
-
 class _HomeState extends State<Home> {
   List<CameraDescription> cameras = [];
   CameraImage? cameraImage;
   CameraController? cameraController;
   String output = '';
-
   @override
   void initState() {
     super.initState();
@@ -32,32 +29,27 @@ class _HomeState extends State<Home> {
         orElse: () => cameras[0],
       );
       cameraController = CameraController(backCamera, ResolutionPreset.high);
-      await cameraController!.initialize().then((_) {
-        if (!mounted) {
-          return;
-        }
-        setState(() {
-          cameraController!.startImageStream((imageFromStream) {
-            if (!cameraController!.value.isTakingPicture) {
-              cameraController!.stopImageStream();
-              setState(() {
-                cameraImage = imageFromStream;
-              });
-              classifyImage();
-            }
-          });
+      await cameraController!.initialize();
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        cameraController!.startImageStream((imageFromStream) {
+          if (!cameraController!.value.isTakingPicture) {
+            cameraImage = imageFromStream;
+            classifyImage(); // Classify the image in each frame
+          }
         });
-      }).catchError((error) {
-        print('Error initializing camera: $error');
       });
     } else {
+      // Handle the case where no cameras are available
       print('No cameras found.');
     }
   }
 
   classifyImage() async {
     if (cameraImage != null) {
-      var prediction = await Tflite.runModelOnFrame(
+      var predictions = await Tflite.runModelOnFrame(
         bytesList: cameraImage!.planes.map((plane) {
           return plane.bytes;
         }).toList(),
@@ -70,15 +62,11 @@ class _HomeState extends State<Home> {
         threshold: 0.1,
         asynch: true,
       );
-      prediction!.forEach((element) {
-        int labelIndex = element['index'];
-        double confidence = element['confidence'];
-        String label = getLabelFromIndex(labelIndex);
-        print('Label: $label, Confidence: $confidence');
+      if (predictions != null && predictions.isNotEmpty) {
         setState(() {
-          output = label;
+          output = getLabelFromIndex(predictions[0]['index']);
         });
-      });
+      }
     }
   }
 
@@ -92,27 +80,23 @@ class _HomeState extends State<Home> {
       'Rs 500',
       'Rs 2000',
     ];
-
     if (index >= 0 && index < labels.length) {
       return labels[index];
     } else {
       return 'Unknown';
     }
   }
-
   loadModel() async {
     await Tflite.loadModel(
       model: 'assets/model.tflite',
       labels: 'assets/labels.txt',
     );
   }
-
   @override
   void dispose() {
-    cameraController?.dispose();
+    cameraController!.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -126,12 +110,12 @@ class _HomeState extends State<Home> {
             child: Container(
               height: MediaQuery.of(context).size.height * 0.8,
               width: MediaQuery.of(context).size.width,
-              child: cameraController != null && cameraController!.value.isInitialized
-                  ? AspectRatio(
+              child: (!cameraController!.value.isInitialized)
+                  ? Container()
+                  : AspectRatio(
                 aspectRatio: cameraController!.value.aspectRatio,
                 child: CameraPreview(cameraController!),
-              )
-                  : Container(),
+              ),
             ),
           ),
           Text(
