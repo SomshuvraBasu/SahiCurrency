@@ -32,27 +32,32 @@ class _HomeState extends State<Home> {
         orElse: () => cameras[0],
       );
       cameraController = CameraController(backCamera, ResolutionPreset.high);
-      await cameraController!.initialize();
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        cameraController!.startImageStream((imageFromStream) {
-          if (!cameraController!.value.isTakingPicture) {
-            cameraImage = imageFromStream;
-            classifyImage(); // Classify the image in each frame
-          }
+      await cameraController!.initialize().then((_) {
+        if (!mounted) {
+          return;
+        }
+        setState(() {
+          cameraController!.startImageStream((imageFromStream) {
+            if (!cameraController!.value.isTakingPicture) {
+              cameraController!.stopImageStream();
+              setState(() {
+                cameraImage = imageFromStream;
+              });
+              classifyImage();
+            }
+          });
         });
+      }).catchError((error) {
+        print('Error initializing camera: $error');
       });
     } else {
-      // Handle the case where no cameras are available
       print('No cameras found.');
     }
   }
 
   classifyImage() async {
     if (cameraImage != null) {
-      var predictions = await Tflite.runModelOnFrame(
+      var prediction = await Tflite.runModelOnFrame(
         bytesList: cameraImage!.planes.map((plane) {
           return plane.bytes;
         }).toList(),
@@ -65,11 +70,15 @@ class _HomeState extends State<Home> {
         threshold: 0.1,
         asynch: true,
       );
-      if (predictions != null && predictions.isNotEmpty) {
+      prediction!.forEach((element) {
+        int labelIndex = element['index'];
+        double confidence = element['confidence'];
+        String label = getLabelFromIndex(labelIndex);
+        print('Label: $label, Confidence: $confidence');
         setState(() {
-          output = getLabelFromIndex(predictions[0]['index']);
+          output = label;
         });
-      }
+      });
     }
   }
 
@@ -100,7 +109,7 @@ class _HomeState extends State<Home> {
 
   @override
   void dispose() {
-    cameraController!.dispose();
+    cameraController?.dispose();
     super.dispose();
   }
 
@@ -117,12 +126,12 @@ class _HomeState extends State<Home> {
             child: Container(
               height: MediaQuery.of(context).size.height * 0.8,
               width: MediaQuery.of(context).size.width,
-              child: (!cameraController!.value.isInitialized)
-                  ? Container()
-                  : AspectRatio(
+              child: cameraController != null && cameraController!.value.isInitialized
+                  ? AspectRatio(
                 aspectRatio: cameraController!.value.aspectRatio,
                 child: CameraPreview(cameraController!),
-              ),
+              )
+                  : Container(),
             ),
           ),
           Text(
