@@ -16,15 +16,19 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
+    initialize();
+  }
+
+  initialize() async {
+    await loadModel();
     loadCamera();
-    loadModel();
   }
 
   loadCamera() async {
     cameras = await availableCameras();
     if (cameras.isNotEmpty) {
       CameraDescription backCamera = cameras.firstWhere(
-        (camera) => camera.lensDirection == CameraLensDirection.back,
+            (camera) => camera.lensDirection == CameraLensDirection.back,
         orElse: () => cameras[0],
       );
       cameraController = CameraController(backCamera, ResolutionPreset.high);
@@ -35,11 +39,8 @@ class _HomeState extends State<Home> {
       setState(() {
         cameraController!.startImageStream((imageFromStream) {
           if (!cameraController!.value.isTakingPicture) {
-            cameraController!.stopImageStream();
-            setState(() {
-              cameraImage = imageFromStream;
-            });
-            classifyImage();
+            cameraImage = imageFromStream;
+            classifyImage(); // Classify the image in each frame
           }
         });
       });
@@ -51,7 +52,7 @@ class _HomeState extends State<Home> {
 
   classifyImage() async {
     if (cameraImage != null) {
-      var prediction = await Tflite.runModelOnFrame(
+      var predictions = await Tflite.runModelOnFrame(
         bytesList: cameraImage!.planes.map((plane) {
           return plane.bytes;
         }).toList(),
@@ -64,15 +65,11 @@ class _HomeState extends State<Home> {
         threshold: 0.1,
         asynch: true,
       );
-      prediction!.forEach((element) {
-        int labelIndex = element['index'];
-        double confidence = element['confidence'];
-        String label = getLabelFromIndex(labelIndex);
-        print('Label: $label, Confidence: $confidence');
+      if (predictions != null && predictions.isNotEmpty) {
         setState(() {
-          output = label;
+          output = getLabelFromIndex(predictions[0]['index']);
         });
-      });
+      }
     }
   }
 
@@ -123,9 +120,9 @@ class _HomeState extends State<Home> {
               child: (!cameraController!.value.isInitialized)
                   ? Container()
                   : AspectRatio(
-                      aspectRatio: cameraController!.value.aspectRatio,
-                      child: CameraPreview(cameraController!),
-                    ),
+                aspectRatio: cameraController!.value.aspectRatio,
+                child: CameraPreview(cameraController!),
+              ),
             ),
           ),
           Text(
