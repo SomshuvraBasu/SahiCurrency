@@ -84,13 +84,13 @@ class _HomeState extends State<Home> {
 
   String getLabelFromIndex(int index) {
     List<String> labels = [
-      '0 10',
-      '1 20',
-      '2 50',
-      '3 100',
-      '4 200',
-      '5 500',
-      '6 2000',
+      'Rs 10',
+      'Rs 20',
+      'Rs 50',
+      'Rs 100',
+      'Rs 200',
+      'Rs 500',
+      'Rs 2000',
     ];
 
     if (index >= 0 && index < labels.length) {
