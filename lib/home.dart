@@ -24,10 +24,10 @@ class _HomeState extends State<Home> {
     cameras = await availableCameras();
     if (cameras.isNotEmpty) {
       CameraDescription backCamera = cameras.firstWhere(
-            (camera) => camera.lensDirection == CameraLensDirection.back,
+        (camera) => camera.lensDirection == CameraLensDirection.back,
         orElse: () => cameras[0],
       );
-      cameraController = CameraController(backCamera, ResolutionPreset.medium);
+      cameraController = CameraController(backCamera, ResolutionPreset.high);
       await cameraController!.initialize();
       if (!mounted) {
         return;
@@ -123,9 +123,9 @@ class _HomeState extends State<Home> {
               child: (!cameraController!.value.isInitialized)
                   ? Container()
                   : AspectRatio(
-                aspectRatio: cameraController!.value.aspectRatio,
-                child: CameraPreview(cameraController!),
-              ),
+                      aspectRatio: cameraController!.value.aspectRatio,
+                      child: CameraPreview(cameraController!),
+                    ),
             ),
           ),
           Text(
