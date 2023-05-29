@@ -12,6 +12,7 @@ class _HomeState extends State<Home> {
   CameraImage? cameraImage;
   CameraController? cameraController;
   String output = '';
+
   @override
   void initState() {
     super.initState();
@@ -27,22 +28,23 @@ class _HomeState extends State<Home> {
     cameras = await availableCameras();
     if (cameras.isNotEmpty) {
       CameraDescription backCamera = cameras.firstWhere(
-        (camera) => camera.lensDirection == CameraLensDirection.back,
+            (camera) => camera.lensDirection == CameraLensDirection.back,
         orElse: () => cameras[0],
       );
       cameraController = CameraController(backCamera, ResolutionPreset.high);
       await cameraController!.initialize();
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        cameraController!.startImageStream((imageFromStream) {
-          if (!cameraController!.value.isTakingPicture) {
-            cameraImage = imageFromStream;
-            classifyImage(); // Classify the image in each frame
-          }
+      if (mounted) { // Add a null check for mounted before updating the state
+        setState(() {
+          cameraController!.startImageStream((imageFromStream) {
+            if (!cameraController!.value.isTakingPicture) {
+              setState(() {
+                cameraImage = imageFromStream;
+              });
+              classifyImage(); // Classify the image in each frame
+            }
+          });
         });
-      });
+      }
     } else {
       // Handle the case where no cameras are available
       print('No cameras found.');
@@ -98,7 +100,7 @@ class _HomeState extends State<Home> {
 
   @override
   void dispose() {
-    cameraController!.dispose();
+    cameraController?.dispose(); // Use the null-aware operator to dispose the cameraController if it's not null
     super.dispose();
   }
 
@@ -115,12 +117,12 @@ class _HomeState extends State<Home> {
             child: Container(
               height: MediaQuery.of(context).size.height * 0.8,
               width: MediaQuery.of(context).size.width,
-              child: (!cameraController!.value.isInitialized)
-                  ? Container()
-                  : AspectRatio(
-                      aspectRatio: cameraController!.value.aspectRatio,
-                      child: CameraPreview(cameraController!),
-                    ),
+              child: cameraController?.value.isInitialized == true // Add a null check before accessing cameraController.value
+                  ? AspectRatio(
+                aspectRatio: cameraController!.value.aspectRatio,
+                child: CameraPreview(cameraController!),
+              )
+                  : Container(),
             ),
           ),
           Text(
