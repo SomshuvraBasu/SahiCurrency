@@ -1,10 +1,12 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:tflite/tflite.dart';
+
 class Home extends StatefulWidget {
   @override
   _HomeState createState() => _HomeState();
 }
+
 class _HomeState extends State<Home> {
   List<CameraDescription> cameras = [];
   CameraImage? cameraImage;
@@ -25,7 +27,7 @@ class _HomeState extends State<Home> {
     cameras = await availableCameras();
     if (cameras.isNotEmpty) {
       CameraDescription backCamera = cameras.firstWhere(
-            (camera) => camera.lensDirection == CameraLensDirection.back,
+        (camera) => camera.lensDirection == CameraLensDirection.back,
         orElse: () => cameras[0],
       );
       cameraController = CameraController(backCamera, ResolutionPreset.high);
@@ -86,17 +88,20 @@ class _HomeState extends State<Home> {
       return 'Unknown';
     }
   }
+
   loadModel() async {
     await Tflite.loadModel(
-      model: 'assets/model.tflite',
-      labels: 'assets/labels.txt',
+      model: 'assets/model_v2.tflite',
+      labels: 'assets/labels_v2.txt',
     );
   }
+
   @override
   void dispose() {
     cameraController!.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -113,9 +118,9 @@ class _HomeState extends State<Home> {
               child: (!cameraController!.value.isInitialized)
                   ? Container()
                   : AspectRatio(
-                aspectRatio: cameraController!.value.aspectRatio,
-                child: CameraPreview(cameraController!),
-              ),
+                      aspectRatio: cameraController!.value.aspectRatio,
+                      child: CameraPreview(cameraController!),
+                    ),
             ),
           ),
           Text(
