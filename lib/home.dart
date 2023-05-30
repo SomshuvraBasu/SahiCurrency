@@ -15,6 +15,8 @@ class _HomeState extends State<Home> {
   CameraImage? cameraImage;
   CameraController? cameraController;
   String output = '';
+  bool isSpeaking = false;
+  String lastOutput = ''; // Declare lastOutput variable here
 
   @override
   void initState() {
@@ -73,7 +75,12 @@ class _HomeState extends State<Home> {
         setState(() {
           output = getLabelFromIndex(predictions[0]['index']);
         });
-        speakOutput(output); // Announce the label using voice
+        if (output != lastOutput && !isSpeaking) {
+          lastOutput = output;
+          isSpeaking = true;
+          await speakOutput(output);
+          isSpeaking = false;
+        }
       }
     }
   }
