@@ -1,6 +1,9 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:tflite/tflite.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+
+FlutterTts flutterTts = FlutterTts();
 
 class Home extends StatefulWidget {
   @override
@@ -70,8 +73,16 @@ class _HomeState extends State<Home> {
         setState(() {
           output = getLabelFromIndex(predictions[0]['index']);
         });
+        speakOutput(output); // Announce the label using voice
       }
     }
+  }
+
+  Future<void> speakOutput(String text) async {
+    await flutterTts.setLanguage('en-US'); // Set the desired language
+    await flutterTts.setPitch(1.0); // Set the pitch of the voice
+    await flutterTts.setSpeechRate(0.8); // Set the speech rate
+    await flutterTts.speak(text); // Speak the provided text
   }
 
   String getLabelFromIndex(int index) {
