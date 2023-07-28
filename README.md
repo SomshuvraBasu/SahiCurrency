@@ -55,7 +55,7 @@ I welcome contributions to SahiCurrency that can improve its accuracy, performan
 
 ## Issues and Feedback
 
-If you encounter any issues while using SahiCurrency or have suggestions for improvement, please report them on the [Issues](link-to-issues) page. We appreciate your feedback and will work towards resolving any problems promptly.
+If you encounter any issues while using SahiCurrency or have suggestions for improvement, please report them on the [Issues](https://github.com/SomshuvraBasu/SahiCurrency/issues) page. We appreciate your feedback and will work towards resolving any problems promptly.
 
 ## License
 
