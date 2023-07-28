@@ -63,7 +63,7 @@ SahiCurrency is open-source and licensed under the [GNU GPLv3 License](https://g
 
 ## Acknowledgments
 
-We would like to express our gratitude to the open-source community for their valuable contributions to the libraries and frameworks used in this project as well as the dataset.
+I would like to express our gratitude to the open-source community for their valuable contributions to the libraries and frameworks used in this project as well as the dataset.
 
 ---
 
