@@ -57,9 +57,9 @@ I welcome contributions to SahiCurrency that can improve its accuracy, performan
 
 If you encounter any issues while using SahiCurrency or have suggestions for improvement, please report them on the [Issues](link-to-issues) page. We appreciate your feedback and will work towards resolving any problems promptly.
 
-<!--## License
+## License
 
-SahiCurrency is open-source and licensed under the [MIT License](link-to-license). Feel free to use, modify, and distribute the app as per the terms of the license.-->
+SahiCurrency is open-source and licensed under the [GNU GPLv3 License](https://github.com/SomshuvraBasu/SahiCurrency/blob/main/LICENSE). Feel free to use, modify, and distribute the app as per the terms of the license.
 
 ## Acknowledgments
 
